@@ -21,6 +21,7 @@ public class AuthorGeneratorExtension implements QuarkusTestBeforeClassCallback,
         authorRepository = cdi.select(AuthorRepository.class).get();
 
         generatedAuthor = authorRepository.createAuthor(new Author(idGenerator.generateId(), "My favorite author"));
+        System.out.println("created author with id " + generatedAuthor.id());
     }
 
     @Override
@@ -28,6 +29,7 @@ public class AuthorGeneratorExtension implements QuarkusTestBeforeClassCallback,
         CDI<Object> cdi = CDI.current();
         authorRepository = cdi.select(AuthorRepository.class).get();
         authorRepository.deleteAuthorWithId(generatedAuthor.id());
+        System.out.println("deleted author with id " + generatedAuthor.id());
     }
 
     @Override

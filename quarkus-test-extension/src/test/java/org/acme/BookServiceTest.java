@@ -15,9 +15,14 @@ class BookServiceTest {
     BookService bookService;
 
     @Test
-    void testCreateBook(@GeneratedAuthor Author author) {
+    void testCreateBookWithAuthor(@GeneratedAuthor Author author) {
         Book book = bookService.createBook(author);
         assertEquals(author.id(), book.author().id());
+    }
+
+    @Test
+    void testNop(@GeneratedAuthor Author author) {
+        //Just test beforeClass and afterAll callbacks
     }
 
 }
