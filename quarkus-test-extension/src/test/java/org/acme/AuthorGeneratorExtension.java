@@ -11,23 +11,25 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 public class AuthorGeneratorExtension implements QuarkusTestBeforeClassCallback, QuarkusTestAfterAllCallback, ParameterResolver {
 
-    private AuthorRepository authorRepository;
-    private Author generatedAuthor;
-
     @Override
     public void beforeClass(Class<?> testClass) {
         CDI<Object> cdi = CDI.current();
         IdGenerator idGenerator = cdi.select(IdGenerator.class).get();
-        authorRepository = cdi.select(AuthorRepository.class).get();
+        AuthorRepository authorRepository = cdi.select(AuthorRepository.class).get();
+        GeneratedAuthorProvider authorProvider = cdi.select(GeneratedAuthorProvider.class).get();
 
-        generatedAuthor = authorRepository.createAuthor(new Author(idGenerator.generateId(), "My favorite author"));
+        Author generatedAuthor = authorRepository.createAuthor(new Author(idGenerator.generateId(), "My favorite author"));
+        authorProvider.set(generatedAuthor);
         System.out.println("created author with id " + generatedAuthor.id());
     }
 
     @Override
     public void afterAll(QuarkusTestContext context) {
         CDI<Object> cdi = CDI.current();
-        authorRepository = cdi.select(AuthorRepository.class).get();
+        AuthorRepository authorRepository = cdi.select(AuthorRepository.class).get();
+        GeneratedAuthorProvider authorProvider = cdi.select(GeneratedAuthorProvider.class).get();
+
+        Author generatedAuthor = authorProvider.get();
         authorRepository.deleteAuthorWithId(generatedAuthor.id());
         System.out.println("deleted author with id " + generatedAuthor.id());
     }
@@ -40,6 +42,8 @@ public class AuthorGeneratorExtension implements QuarkusTestBeforeClassCallback,
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return generatedAuthor;
+        CDI<Object> cdi = CDI.current();
+        GeneratedAuthorProvider authorProvider = cdi.select(GeneratedAuthorProvider.class).get();
+        return authorProvider.get();
     }
 }
